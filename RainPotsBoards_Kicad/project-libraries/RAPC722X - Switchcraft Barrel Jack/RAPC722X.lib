@@ -1,0 +1,33 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# RAPC722X
+#
+DEF RAPC722X J 0 40 Y N 1 L N
+F0 "J" -200 200 50 H V L BNN
+F1 "RAPC722X" -200 -250 50 H V L BNN
+F2 "SWITCHCRAFT_RAPC722X" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "11 mm" 0 0 50 H I L BNN "MAXIMUM_PACKAGE_HEIGHT"
+F5 "A" 0 0 50 H I L BNN "PARTREV"
+F6 "Switchcraft" 0 0 50 H I L BNN "MANUFACTURER"
+F7 "Manufacturer Recommendations" 0 0 50 H I L BNN "STANDARD"
+DRAW
+P 4 0 0 10 0 -90 10 -50 -10 -50 0 -90 f
+P 2 0 0 10 0 0 200 0 N
+P 2 0 0 10 0 0 0 -100 N
+P 2 0 0 10 200 -100 -50 -100 N
+P 2 0 0 10 -50 -100 -75 -75 N
+P 2 0 0 10 -75 -75 -100 -100 N
+P 2 0 0 10 200 100 -150 100 N
+P 2 0 0 10 -150 100 -175 75 N
+P 2 0 0 10 -175 75 -200 100 N
+X ~ SLEEVE 300 -100 100 L 40 40 0 0 P 
+X ~ PIN 300 100 100 L 40 40 0 0 P 
+X ~ SHUNT 300 0 100 L 40 40 0 0 P 
+ENDDRAW
+ENDDEF
+#
+# End Library

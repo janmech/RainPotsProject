@@ -1,0 +1,40 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#(c) SnapEDA 2016 (snapeda.com)
+#This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License (CC BY-SA) with Design Exception 1.0
+#
+# 6N138S
+#
+DEF 6N138S U 0 40 Y Y 1 L N
+F0 "U" -130 220 50 H V L BNN
+F1 "6N138S" -140 -520 50 H V L BNN
+F2 "8-SMD" 0 0 50 H I L BNN
+F3 "" 0 0 50 H I L BNN
+F4 "IC-09482" 0 0 50 H I L BNN "PROD_ID"
+F5 "6N138M" 0 0 50 H I L BNN "VALUE"
+DRAW
+P 2 0 0 10 -200 -400 300 -400 N
+P 2 0 0 10 300 -400 300 200 N
+P 2 0 0 10 300 200 -200 200 N
+P 2 0 0 10 -200 200 -200 100 N
+P 2 0 0 10 -200 100 -200 -300 N
+P 2 0 0 10 -200 -300 -200 -400 N
+P 2 0 0 8 -200 100 -130 100 N
+P 2 0 0 8 -130 100 -130 -70 N
+P 2 0 0 8 -130 -70 -90 -70 N
+P 2 0 0 8 -130 -70 -170 -70 N
+P 2 0 0 8 -170 -70 -130 -110 N
+P 2 0 0 8 -130 -110 -90 -70 N
+P 2 0 0 8 -130 -110 -90 -110 N
+P 2 0 0 8 -170 -110 -130 -110 N
+P 2 0 0 8 -130 -110 -130 -300 N
+P 2 0 0 8 -130 -300 -200 -300 N
+X C 3 -400 -300 200 R 40 40 0 0 B 
+X A 2 -400 100 200 R 40 40 0 0 B 
+X VCC 8 500 100 200 L 40 40 0 0 B 
+X VOUT 6 500 -100 200 L 40 40 0 0 B 
+X GND 5 500 -300 200 L 40 40 0 0 B 
+ENDDRAW
+ENDDEF
+#
+# End Library

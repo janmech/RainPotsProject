@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP KCDX-5S-N
+D Circular DIN Connectors 5P R/A PCB NON SHLD 10mm CIRC DIN RECPT
+K
+F http://www.kycon.com/Pub_Eng_Draw/KCDX-5S-N.pdf
+$ENDCMP
+#
+#End Doc Library

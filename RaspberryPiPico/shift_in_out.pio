@@ -1,0 +1,126 @@
+;
+; Copyright (c) 2021 Jan Mech
+; Shift in serial data from external PISO fifht register
+;
+; NEW version, tested! A new attempted to only push data and trigger IRQ if a button is pressed
+
+
+.program shift_in_out
+
+; stalling:
+    ; jmp stalling          ; We stall the state machine until the a jump command is executed that deteminsa if it's an in aor out shift instance
+
+PUBLIC pgm_shift_in:
+    set pins, 0b01        ; Initial state: PL: HIGH, SCL: LOW 
+loop_shift_in:          
+    set x, 31             ; set register x to countown value
+    set pins, 0b00        ; PL: LOW, SCL: LOW (push paralell data to shift out) - falling edge
+    set pins, 0b01        ; PL: HIGH, SCL: LOW (push paralell data to shift out) - riding edge
+read_bit:
+    in pins, 1            ; Shift In one bit of serial data   
+    set pins, 0b11        ; Clock tick to shift to next bit - rising edge
+    set pins, 0b01        ; Clock tick to shift to next bit - falling edge
+    jmp x-- read_bit      ; Repeat for all 32 bits
+
+    mov x, y
+    mov y, isr            ; Copy ISR data to y
+    jmp x!=y push_data    ; Only push data if something has changed              
+discard_data:
+    mov isr, null         ; Clear ISR and reset shift-in counter to 0
+    jmp loop_shift_in
+push_data:
+    push noblock          ; Push ISR to FIFO
+    irq 0                 ; Set IRQ flag to trigger interrupt 
+    jmp discard_data
+
+
+PUBLIC pgm_shift_out:
+    set x, 31            ; Set register x to countown value 
+    set pins 0b00	     ; Set Clock and Latch LOW
+	pull                 ; Pull data from TX FIFO
+clock_out:
+    out pins, 1		     ; Push out 1 bit to external shift register
+    set pins 0b10	     ; Clock tick rising edge
+    set pins 0b00        ; Clock tick faling edge
+    jmp x-- clock_out    ; Repeat for all 32 bits
+    set pins 0b01        ; Latch rising edge to display data
+    set pins 0b00        ; Latch falling edge (currently redundant)
+    jmp pgm_shift_out
+
+
+
+
+% c-sdk {
+void shift_in_out_program_init(PIO pio, uint sm, uint offset, uint base_pin, bool is_in) {
+    
+    pio_sm_config c = shift_in_out_program_get_default_config(offset); 
+
+    // Set the clock diver. This results in aprox 3kHz frequency (1 cycle = sampling all 16 inputs)
+    float clock_divider = (float) clock_get_hz(clk_sys) / 200000; 
+    sm_config_set_clkdiv(&c, clock_divider);
+
+    // Connect GPIO Pins for writing data
+    pio_gpio_init(pio, base_pin);       // Used by shift_in and shift_out
+    pio_gpio_init(pio, base_pin + 1);   // Used by shift_in and shift_out
+    pio_gpio_init(pio, base_pin + 2);   // Used by shift_out only
+
+    if(is_in) {
+
+        // Pin Mapping SHIFT IN
+
+        // +===================+=========+===========+==========+
+        // | PIN FUNC          | PIN INDEX | PIN DIR | PIN TYPE |
+        // +===================+===========+=========+==========+
+        // | Shift IN PL       | base      |  OUT    |   SET    |
+        // +-------------------+-----------+---------+----------+
+        // | Shift IN CLK      | base + 1  |  OUT    |   SET    |  
+        // +-------------------+-----------+---------+----------+
+        // | Shift IN DATA     | base + 2  |  IN     |   IN     |  
+        // +-------------------+-----------+---------+----------+
+
+        pio_sm_set_consecutive_pindirs(pio, sm, base_pin, 2, true);
+    
+        sm_config_set_set_pins(&c, base_pin, 2);
+        sm_config_set_in_pins(&c, base_pin + 2);
+
+        // args: BOOL right_shift, BOOL auto_push, 1..32 push_threshold
+        // The external shift register(s) send LSB first. Therfore we do a right-shift so LSB stays LSB
+        // No autopush in this version!!
+        sm_config_set_in_shift(&c, true, false, 32);
+
+        pio_sm_init(pio, sm, offset + shift_in_out_offset_pgm_shift_in, &c);
+
+        pio_sm_set_enabled(pio, sm, true);
+        // pio_sm_exec(pio, sm, pio_encode_jmp(offset + shift_in_out_offset_pgm_shift_in));
+
+   } else {
+
+        // Pin Mapping SHIFT OUT
+
+        // +===================+==========+===========+=========+
+        // | PIN FUNC          | PIN TYPE | PIN INDEX | PIN DIR |
+        // +===================+==========+===========+=========+
+        // | Shift OUT LATCH   |    SET   |  base     |   OUT   |  
+        // +-------------------+----------+-----------+---------+
+        // | Shift OUT CLK     |    SET   |  base + 1 |   OUT   |  
+        // +-------------------+----------+-----------+---------+
+        // | Shift OUT DATA    |    OUT   |  base + 2 |   OUT   |  
+        // +-------------------+----------+-----------+---------+
+
+        pio_sm_set_consecutive_pindirs(pio, sm, base_pin, 3, true);
+
+        sm_config_set_set_pins(&c, base_pin, 2);
+        sm_config_set_out_pins(&c, base_pin + 2, 1);
+
+        
+        // We do a left-shift to shift MSB first to external shift register(s). This way we stay flexible and can connect any amout up to 4 8-SIPOs
+        // args: BOOL right_shift, BOOL auto_push, 1..32 push_threshold
+        sm_config_set_out_shift(&c, false, false, 32);
+        
+        pio_sm_init(pio, sm, offset + shift_in_out_offset_pgm_shift_out, &c);
+  
+        pio_sm_set_enabled(pio, sm, true);
+        // pio_sm_exec(pio, sm, pio_encode_jmp(offset + shift_in_out_offset_pgm_shift_out));
+   } 
+}
+%}

@@ -1,0 +1,70 @@
+Calibration:
+FIRST BYTE - START CONDITION
+    0xFx (0 -f) START Remote Message (Least significant nibble: Board Index)
+
+SECOND BYTE - COMMAND
+    0XE0 = CALIBRATE MIN
+    0XE1 = CALIBRATE CENTER
+    0XE2 = CALIBRATE MAX
+    0xE3 = START BUTTON SETTINGS followed by 8 data bytes, one for each button:
+            Options For Button 0 (Data Byte 1):
+                - 0x00 [Toggle]
+                - 0x01 [Momentary]
+
+            Option For Button 1 (Data Byte 2)
+                0x02 - 0x05: Max Steps
+
+            Options For Buttons 2 - 5 (Data Byte 3 - 6)
+                - 0x00 [Toggle]
+                - 0x01 [Momentary],
+                - 0x04 [RADIO_GROUP]
+
+                RADIO_GROUP:
+                    Only applies to Button 2 (Data Byte 3).
+                    If Button 2 (Data Byte 3) is set to Radio Group all subsequent Buttons are set to RADIO_GROUP as well
+
+            7th Data byte set "Display Zero on Increment Button"
+                0x00 Do NOT display 0
+                0x01: Display Zero
+
+            8th Data byte: "Display Zero on Radio Group"
+                0x00 Do NOT display 0
+                0x01: Display Zero
+
+    0xE4 = START CONTROLLER STATUS followed by 14 data bytes:
+            0x01 [active] or 0x00 [not active] for each controller
+
+    0xE5 = SET BUTTON VALUES  followed by 6 data bytes
+            DataBytes 6x
+                Button Index (0x00 - 0x05)
+                Button State:
+                    0x01 - 0x04 Button Value
+                    0x0F - Don't Set Button
+
+    0xE6 = METER VALUE followed by 2 data bytes
+        Data Byte 1: Meter index
+        Data Byte 2: Meter Value (0 - 255)
+
+    ---- USB ONLY: -----
+    Board will Send:
+        0x01 --> Starting Command Processing (ASCII SOH)
+        0x03 --> Finished Command Processing (ASCII EOT)
+
+
+------- REMOVE FROM CODE ---------
+    0xE6 = SIGNAL VALUE PICKUP
+        1 Data Byte:
+            0 Value Locked (no pickup needed)
+            1 Value Up (Turn Knob up to pick up)
+            2 Value Down (Turn Knob down to pick up)
+
+
+
+
+
+#define CONTROLLER_MODE_TOGGLE 0
+#define CONTROLLER_MODE_MOMENTARY 1
+#define CONTROLLER_MODE_INCREMENT 2
+#define CONTROLLER_MODE_KNOB 3
+#define CONTROLLER_MODE_RADIO_GROUP 4
+
